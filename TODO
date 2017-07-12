@@ -1,0 +1,13 @@
+☐ Create a static version of interface
+☐ Setup redux
+☐ Setup firebase
+
+## Functionalities & Rules
+* User can view a map with a list of markers
+* User can create a marker on map
+* Each mark belongs only to user creator
+* User can make login with google (view firebase doc)
+* User can select one (default) avatar
+* Display the user details on mark (use avatar)
+* An user can deleted their mark
+* Display an realtime counter for each new mark created (Firebase listener event)
