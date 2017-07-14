@@ -14,6 +14,7 @@ import Toolbar from 'material-ui/Toolbar';
 import Grid from 'material-ui/Grid';
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
+import { CircularProgress } from 'material-ui/Progress';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
 import Typography from 'material-ui/Typography';
@@ -33,9 +34,23 @@ const styleSheet = createStyleSheet('AppBar', theme => ({
   button: {
     margin: theme.spacing.unit,
   },
-  avatar: {
+  progress: {
+    color: 'white',
+  },
+  progressText: {
+    color: 'white'
+  },
+  progressLoaderContainer: {
+    display: 'flex',
+  },
+  userProfileContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  userProfileAvatar: {
     height: 24,
     width: 24,
+    marginRight: theme.spacing.unit,
   }
 }));
 
@@ -63,9 +78,11 @@ class AppBar extends Component {
       })
   }
 
+  handleLogout = () => this.props.firebase.logout()
+
   render() {
 
-    const { account } = this.props
+    const { account, auth, isLoadingAuth } = this.props
     const accountExists = isLoaded(account) && !isEmpty(account)
     const classes = this.props.classes;
 
@@ -82,14 +99,34 @@ class AppBar extends Component {
           </Grid>
           <Grid item xs>
             <Toolbar style={{ justifyContent: 'flex-end' }}>
-              { !accountExists ? (
+              { !isLoaded(account) && (
+                <div className={classes.progressLoaderContainer}>
+                  <CircularProgress size={24} className={classes.progress} />
+                  <Typography className={classes.progressText} type="body1" component="p">
+                    Checking..
+                  </Typography>
+                </div>
+              ) }
+
+              { isLoaded(account) && isEmpty(account) && !isLoadingAuth && (
                 <Button onClick={this.googleLogin} dense color="contrast" className={classes.button}>
                   <AccountCircle />
-                  Fazer Login
+                  Login
                 </Button>
-              ) : (
-                <Avatar alt="Remy Sharp" src={account.avatarUrl} className={classes.avatar} />
-              ) }
+              )}
+
+              { !isEmpty(account) && !isLoadingAuth && (
+                <div className={classes.userProfileContainer}>
+                  <Avatar alt={ account.displayName } src={account.avatarUrl} className={classes.userProfileAvatar} />
+                  <Typography className={classes.progressText} type="body1" component="p">
+                    { account.displayName }
+                  </Typography>
+                  <Button onClick={this.handleLogout} dense color="contrast" className={classes.button}>
+                    <AccountCircle />
+                    Logout
+                  </Button>
+                </div>
+              )}
             </Toolbar>
           </Grid>
         </Grid>
@@ -110,10 +147,15 @@ const fbWrappedComponent = firebaseConnect([
   '/markers'
 ])(styledAppBar)
 
-const mapStateToProps = ({ firebase }) => ({
-  authError: pathToJS(firebase, 'authError'),
-  auth: pathToJS(firebase, 'auth'),
-  account: pathToJS(firebase, 'profile')
-})
+const mapStateToProps = ({ firebase }) => {
+  const auth = pathToJS(firebase, 'auth')
+  const isAuthLoaded = isLoaded(auth)
+  return {
+    authError: pathToJS(firebase, 'authError'),
+    auth: auth,
+    isLoadingAuth: !isAuthLoaded,
+    account: pathToJS(firebase, 'profile')
+  }
+}
 
 export default connect(mapStateToProps)(fbWrappedComponent)

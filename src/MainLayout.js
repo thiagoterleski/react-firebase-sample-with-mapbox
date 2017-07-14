@@ -29,6 +29,7 @@ const styleSheet = createStyleSheet('MainLayout', theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: '#ccc',
+    height: 'calc(100vh - 64px)',
   },
   header: {
     flexGrow: 0,

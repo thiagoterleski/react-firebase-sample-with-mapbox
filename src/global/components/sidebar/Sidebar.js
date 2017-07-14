@@ -5,14 +5,17 @@ import {
   firebaseConnect,
   isLoaded,
   isEmpty,
+  pathToJS,
   dataToJS
 } from 'react-redux-firebase'
+import { toggleCreationModeAction } from '../../../store'
 import { withStyles, createStyleSheet } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import Divider from 'material-ui/Divider';
+import Avatar from 'material-ui/Avatar';
 import InboxIcon from 'material-ui-icons/Inbox';
 import DraftsIcon from 'material-ui-icons/Drafts';
 import Button from 'material-ui/Button';
@@ -25,66 +28,97 @@ const styleSheet = createStyleSheet('Sidebar', theme => ({
     display: 'flex',
     maxHeight: 'calc(100vh - 64px)'
   },
-  sidebar: theme.mixins.gutters({
-    paddingTop: 16,
-    paddingBottom: 16,
+  sidebar: {
+    flexGrow: 1,
     position: 'relative',
     zIndex: 9,
     display: 'flex',
     flexDirection: 'column',
-  }),
-  sidebarContent: {
-    flexGrow: 1,
+    justifyContent: 'space-between',
   },
+  sidebarWidget: theme.mixins.gutters({
+    paddingTop: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2,
+  }),
+  sidebarFooter: theme.mixins.gutters({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    paddingTop: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2,
+  }),
+  head: theme.mixins.gutters({
+
+  })
 }));
 
 class Sidebar extends Component {
-  constructor(props) {
-    super()
-  }
-  onSaveNewLocation = (event) => {
+
+  onSaveMarker = (event) => {
     const { firebase } = this.props
     event.preventDefault()
-    firebase.push('/markers', { text: 'sample marker', done: false })
+
+    const marker = {
+      user: this.props.account,
+      position: this.props.currentMarkerPostiion,
+      createdAt: new Date(),
+    }
+
+    firebase.push('/markers', marker)
+
   }
+
   render() {
-    const { firebase } = this.props
+    const { markers, firebase, auth, account, currentMarkerPostiion, isCreating, toggleCreationModeAction } = this.props
     const classes = this.props.classes;
-    
+
     return (
       <div className={classes.container}>
         <Paper className={classes.sidebar} elevation={4}>
-          <Grid container direction="column" justify="space-between" className={classes.sidebarContent}>
-            <Grid item xs={12} className={classes.sidebarWidget}>
-              <Grid container>
-                <Grid item xs={12}>
-                  <Typography type="headline" component="h3">
-                    React Mapbox
-                  </Typography>
-                  <Typography type="body1" component="p">
-                    This application use Firebase as backend service and MabBox to render the map
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container justify="center" align="center" direction="column">
-                    <Grid item xs={12}>
-                      <Typography type="caption" gutterBottom component="p">
-                        You must be logged to create an marker
-                      </Typography>
-                      <Button disabled onClick={this.onSaveNewLocation} raised className={classes.button} color="accent">
-                        Create my location
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} className={classes.sidebarWidget}>
+          <div className={classes.sidebarWidget}>
+            <Typography type="headline" component="h3">
+              React Mapbox
+            </Typography>
+          </div>
+          <div className={classes.sidebarWidget} style={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Typography type="title" className={classes.head} component="h3">
+              Last five insertions
+            </Typography>
+            <List dense>
+            { markers && isLoaded(markers) && Object.keys(markers).map((key, i) => (markers[key].user) && (i < 5) ? (
+              <ListItem button key={key}>
+                <Avatar alt={markers[key].user.displayName} src={markers[key].user.avatarUrl} />
+                <ListItemText primary={markers[key].user.displayName} secondary={markers[key].user.email} />
+              </ListItem>
+            ) : null ) }
+            </List>
+          </div>
+
+          { isCreating && (
+            <div className={classes.sidebarWidget}>
               <Typography type="body1" component="p">
-                Paper can be used to build surface or other elements for your application.
+                Click on map to select the local that you want put yout mark
               </Typography>
-            </Grid>
-          </Grid>
+            </div>
+          ) }
+          <div className={classes.sidebarFooter}>
+            { isLoaded(account) && isEmpty(account) && (
+              <Typography type="caption" gutterBottom component="p">
+                You must be logged to create
+              </Typography>
+            ) }
+            { isCreating && currentMarkerPostiion ? (
+              <Button onClick={this.onSaveMarker} raised className={classes.button} color="accent">
+                Save my marker!
+              </Button>
+            ) : (
+              <Button disabled={!isLoaded(account)} onClick={(event) => toggleCreationModeAction(true)} raised className={classes.button} color="accent">
+                Create my location
+              </Button>
+            ) }
+
+
+          </div>
         </Paper>
       </div>
     )
@@ -101,7 +135,7 @@ Sidebar.propTypes = {
 const styledSidebar = withStyles(styleSheet)(Sidebar);
 
 const fbWrappedComponent = firebaseConnect([
-  '/markers'
+  { path: 'markers', queryParams: ['orderByKey', 'limitToLast=100'] } // 10 most recent
   // { type: 'once', path: '/markers' } // for loading once instead of binding
   // '/markers#populate=owner:displayNames' // for populating owner parameter from id into string loaded from /displayNames root
   // '/markers#populate=collaborators:users' // for populating owner parameter from id to user object loaded from /users root
@@ -109,8 +143,12 @@ const fbWrappedComponent = firebaseConnect([
   // '/markers#populate=owner:users:displayName' // for populating owner parameter from id within to displayName string from user object within users root
 ])(styledSidebar)
 
-const mapStateToProps = ({ firebase }) => ({
+const mapStateToProps = ({ firebase, map }) => ({
+    auth: pathToJS(firebase, 'auth'),
+    account: pathToJS(firebase, 'profile'),
     markers: dataToJS(firebase, 'markers'),
+    currentMarkerPostiion: map.currentMarkerPostiion,
+    isCreating: map.isCreating,
 })
 
-export default connect(mapStateToProps)(fbWrappedComponent)
+export default connect(mapStateToProps, { toggleCreationModeAction })(fbWrappedComponent)
