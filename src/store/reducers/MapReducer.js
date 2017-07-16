@@ -1,10 +1,13 @@
 import {
   MAP_SET_CURRENT_MARKER_POSITION,
   MAP_CHANGE_CREATION_MODE,
+  MAP_SELECT_MARKER,
 } from '../types'
 
 const INITIAL_STATE = {
   isCreating: false,
+  center: [ -49.265382, -25.424429 ],
+  selectedMarkerKey: null,
   currentMarkerPostiion: null,
 }
 
@@ -19,6 +22,12 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isCreating: action.payload,
+      }
+    case MAP_SELECT_MARKER.REQUEST:
+      return {
+        ...state,
+        selectedMarkerKey: action.payload,
+        center: action.payload.position,
       }
     case '@@reactReduxFirebase/SET':
       return {

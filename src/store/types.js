@@ -20,3 +20,4 @@ const makeActionTypes = (base) => {
 
 export const MAP_SET_CURRENT_MARKER_POSITION = makeActionTypes('MAP_SET_CURRENT_MARKER_POSITION')
 export const MAP_CHANGE_CREATION_MODE = makeActionTypes('MAP_CHANGE_CREATION_MODE')
+export const MAP_SELECT_MARKER = makeActionTypes('MAP_SELECT_MARKER')

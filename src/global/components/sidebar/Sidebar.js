@@ -8,7 +8,7 @@ import {
   pathToJS,
   dataToJS
 } from 'react-redux-firebase'
-import { toggleCreationModeAction } from '../../../store'
+import { toggleCreationModeAction, selectedMarkerAction } from '../../../store'
 import { withStyles, createStyleSheet } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
@@ -61,7 +61,7 @@ class Sidebar extends Component {
     const marker = {
       user: this.props.account,
       position: this.props.currentMarkerPostiion,
-      createdAt: new Date(),
+      createdAt: new Date().getTime(),
     }
 
     firebase.push('/markers', marker)
@@ -69,7 +69,16 @@ class Sidebar extends Component {
   }
 
   render() {
-    const { markers, firebase, auth, account, currentMarkerPostiion, isCreating, toggleCreationModeAction } = this.props
+    const {
+      markers,
+      firebase,
+      auth,
+      account,
+      currentMarkerPostiion,
+      isCreating,
+      toggleCreationModeAction,
+      selectedMarkerAction,
+    } = this.props
     const classes = this.props.classes;
 
     return (
@@ -86,7 +95,7 @@ class Sidebar extends Component {
             </Typography>
             <List dense>
             { markers && isLoaded(markers) && Object.keys(markers).map((key, i) => (markers[key].user) && (i < 5) ? (
-              <ListItem button key={key}>
+              <ListItem button key={key} onClick={(event) => selectedMarkerAction(markers[key])}>
                 <Avatar alt={markers[key].user.displayName} src={markers[key].user.avatarUrl} />
                 <ListItemText primary={markers[key].user.displayName} secondary={markers[key].user.email} />
               </ListItem>
@@ -151,4 +160,4 @@ const mapStateToProps = ({ firebase, map }) => ({
     isCreating: map.isCreating,
 })
 
-export default connect(mapStateToProps, { toggleCreationModeAction })(fbWrappedComponent)
+export default connect(mapStateToProps, { toggleCreationModeAction, selectedMarkerAction })(fbWrappedComponent)

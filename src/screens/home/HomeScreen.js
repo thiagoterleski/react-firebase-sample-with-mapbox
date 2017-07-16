@@ -11,7 +11,8 @@ import { setCurrentMarkerPositionAction } from '../../store'
 import PropTypes from 'prop-types';
 import { withStyles, createStyleSheet } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
-import ReactMapboxGl, { Marker, Layer, Feature } from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
+import CustomMarker from './CustomMarker'
 import IMGPin from '../../assets/images/maps-and-flags.svg'
 import IMGCross from '../../assets/images/cross.svg'
 
@@ -36,15 +37,32 @@ const styleSheet = createStyleSheet('HomeScreen', theme => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markerAvatar: {
-    borderRadius: 16,
-    boxShadow: theme.shadows[2],
-  }
 }));
 
 class HomeScreen extends Component {
+
+  renderMarkers = () => {
+    const { markers, isCreating, selectedMarkerKey } = this.props
+
+    if (markers && isLoaded(markers) && isCreating === false) {
+      return Object.keys(markers)
+        .map((key) => {
+          const marker = { ...markers[key], key }
+          return(
+            <CustomMarker
+              markerSize={32}
+              item={marker}
+              key={key}
+              onClick={(event, pos) => console.log(markers[selectedMarkerKey].position) }
+              size={selectedMarkerKey === key ? 64 : 32}
+            />
+          )
+        })
+    }
+  }
+
   render() {
-    const { currentMarkerPostiion, classes, isCreating, markers } = this.props
+    const { currentMarkerPostiion, classes, isCreating, markers, center } = this.props
 
     return (
       <Grid item className={classes.mapContainer}>
@@ -55,27 +73,13 @@ class HomeScreen extends Component {
         )}
         <Map
           style="mapbox://styles/mapbox/light-v9"
+          center={center}
           onDragEnd={(map, event) => this.props.setCurrentMarkerPositionAction(map.getCenter()) }
           containerStyle={{
             height: "calc(100vh - 64px)",
             width: "100%"
           }}>
-          { markers
-            && isLoaded(markers)
-            && isCreating === false
-            && Object.keys(markers).map((key) => (markers[key].user) && (
-              <Marker
-                key={key}
-                coordinates={markers[key].position}
-                anchor="bottom">
-                { (markers[key].user.avatarUrl) ? (
-                  <img width={32} height={32} className={classes.markerAvatar} src={markers[key].user.avatarUrl}/>
-                ) : (
-                  <img width={32} height={32} src={IMGPin}/>
-                ) }
-              </Marker>
-            )
-          )}
+          { this.renderMarkers() }
         </Map>
       </Grid>
     )
@@ -91,6 +95,8 @@ const HomeScreenWithStyles = withStyles(styleSheet)(HomeScreen);
 const mapStateToProps = (state) => ({
   markers: dataToJS(state.firebase, 'markers'),
   isCreating: state.map.isCreating,
+  center: state.map.center,
+  selectedMarkerKey: state.map.selectedMarkerKey,
   currentMarkerPostiion: state.map.currentMarkerPostiion,
 })
 export default connect(mapStateToProps, { setCurrentMarkerPositionAction })(HomeScreenWithStyles)
