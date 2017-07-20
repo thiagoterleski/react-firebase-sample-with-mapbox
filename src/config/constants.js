@@ -16,7 +16,7 @@ export const formNames = {
   signup: SIGNUP_FORM_NAME,
   login: LOGIN_FORM_NAME,
   recoverCode: RECOVER_CODE_FORM_NAME,
-  recoverEmail: RECOVER_EMAIL_FORM_NAME
+  recoverEmail: RECOVER_EMAIL_FORM_NAME,
 }
 
 export const paths = {
@@ -24,7 +24,7 @@ export const paths = {
   account: ACCOUNT_PATH,
   detail: DETAIL_PATH,
   login: LOGIN_PATH,
-  signup: SIGNUP_PATH
+  signup: SIGNUP_PATH,
 }
 
 export default { ...paths, ...formNames }

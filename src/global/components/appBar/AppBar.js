@@ -1,36 +1,24 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
   firebaseConnect,
   isLoaded,
   isEmpty,
-  pathToJS
+  pathToJS,
 } from 'react-redux-firebase'
-import { withStyles, createStyleSheet } from 'material-ui/styles';
-import Icon from 'material-ui/Icon';
-import { AppBar as UIAppBar } from 'material-ui';
-import Toolbar from 'material-ui/Toolbar';
-import Grid from 'material-ui/Grid';
-import Avatar from 'material-ui/Avatar';
-import IconButton from 'material-ui/IconButton';
-import { CircularProgress } from 'material-ui/Progress';
-import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
-import Typography from 'material-ui/Typography';
-import DeleteIcon from 'material-ui-icons/Delete';
-import AccountCircle from 'material-ui-icons/AccountCircle';
+import { withStyles, createStyleSheet } from 'material-ui/styles'
+import { AppBar as UIAppBar } from 'material-ui'
+import Toolbar from 'material-ui/Toolbar'
+import Grid from 'material-ui/Grid'
+import Avatar from 'material-ui/Avatar'
+import { CircularProgress } from 'material-ui/Progress'
+import Button from 'material-ui/Button'
+import Typography from 'material-ui/Typography'
+import AccountCircle from 'material-ui-icons/AccountCircle'
 import IMGFirebase from '../../../assets/images/google-firebase.png'
-import IMGGoogle from '../../../assets/images/google-logo.svg'
 
-import {
-  LIST_PATH,
-  ACCOUNT_PATH,
-  LOGIN_PATH,
-  SIGNUP_PATH
-} from '../../../config/constants'
-
-const styleSheet = createStyleSheet('AppBar', theme => ({
+const styleSheet = createStyleSheet('AppBar', (theme) => ({
   button: {
     margin: theme.spacing.unit,
   },
@@ -38,7 +26,7 @@ const styleSheet = createStyleSheet('AppBar', theme => ({
     color: 'white',
   },
   progressText: {
-    color: 'white'
+    color: 'white',
   },
   progressLoaderContainer: {
     display: 'flex',
@@ -51,20 +39,21 @@ const styleSheet = createStyleSheet('AppBar', theme => ({
     height: 24,
     width: 24,
     marginRight: theme.spacing.unit,
-  }
-}));
+  },
+}))
 
 class AppBar extends Component {
 
-  constructor(props) {
+  constructor() {
     super()
     this.state = {
       isLoading: false,
     }
   }
 
-  googleLogin = loginData => {
+  googleLogin = () => {
     this.setState({ isLoading: true })
+
     return this.props.firebase
       .login({ provider: 'google' })
       .then(() => {
@@ -81,17 +70,15 @@ class AppBar extends Component {
   handleLogout = () => this.props.firebase.logout()
 
   render() {
-
-    const { account, auth, isLoadingAuth } = this.props
-    const accountExists = isLoaded(account) && !isEmpty(account)
-    const classes = this.props.classes;
+    const { account, isLoadingAuth } = this.props
+    const classes = this.props.classes
 
     return (
       <UIAppBar position="static" elevation={1}>
         <Grid container justify="space-between">
           <Grid item xs>
             <Toolbar>
-              <img src={IMGFirebase} width={32} height={32} />
+              <img alt="React Firebase" src={IMGFirebase} width={32} height={32} />
               <Typography type="title" color="inherit" className={classes.flex}>
                 React Firebase Application
               </Typography>
@@ -117,7 +104,11 @@ class AppBar extends Component {
 
               { !isEmpty(account) && !isLoadingAuth && (
                 <div className={classes.userProfileContainer}>
-                  <Avatar alt={ account.displayName } src={account.avatarUrl} className={classes.userProfileAvatar} />
+                  <Avatar
+                    alt={account.displayName}
+                    src={account.avatarUrl}
+                    className={classes.userProfileAvatar}
+                  />
                   <Typography className={classes.progressText} type="body1" component="p">
                     { account.displayName }
                   </Typography>
@@ -131,30 +122,33 @@ class AppBar extends Component {
           </Grid>
         </Grid>
       </UIAppBar>
-    );
+    )
   }
 }
 
 AppBar.propTypes = {
   classes: PropTypes.object.isRequired,
   account: PropTypes.object,
-  firebase: PropTypes.object.isRequired
-};
+  firebase: PropTypes.object.isRequired,
+  isLoadingAuth: PropTypes.bool,
+  authError: PropTypes.string,
+}
 
-const styledAppBar = withStyles(styleSheet)(AppBar);
+const styledAppBar = withStyles(styleSheet)(AppBar)
 
 const fbWrappedComponent = firebaseConnect([
-  '/markers'
+  '/markers',
 ])(styledAppBar)
 
 const mapStateToProps = ({ firebase }) => {
   const auth = pathToJS(firebase, 'auth')
   const isAuthLoaded = isLoaded(auth)
+
   return {
     authError: pathToJS(firebase, 'authError'),
     auth: auth,
     isLoadingAuth: !isAuthLoaded,
-    account: pathToJS(firebase, 'profile')
+    account: pathToJS(firebase, 'profile'),
   }
 }
 

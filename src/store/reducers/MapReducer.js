@@ -6,7 +6,7 @@ import {
 
 const INITIAL_STATE = {
   isCreating: false,
-  center: [ -49.265382, -25.424429 ],
+  center: [-49.265382, -25.424429],
   selectedMarkerKey: null,
   currentMarkerPostiion: null,
 }

@@ -1,32 +1,31 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
   firebaseConnect,
   isLoaded,
   isEmpty,
   pathToJS,
-  dataToJS
+  dataToJS,
 } from 'react-redux-firebase'
+import { withStyles, createStyleSheet } from 'material-ui/styles'
+import Paper from 'material-ui/Paper'
+import Typography from 'material-ui/Typography'
+import List, { ListItem, ListItemText } from 'material-ui/List'
+import Avatar from 'material-ui/Avatar'
+import Button from 'material-ui/Button'
+import moment from 'moment'
 import { toggleCreationModeAction, selectedMarkerAction } from '../../../store'
-import { withStyles, createStyleSheet } from 'material-ui/styles';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Divider from 'material-ui/Divider';
-import Avatar from 'material-ui/Avatar';
-import InboxIcon from 'material-ui-icons/Inbox';
-import DraftsIcon from 'material-ui-icons/Drafts';
-import Button from 'material-ui/Button';
-import ModuleSettings from './ModuleSettings'
 
 
-const styleSheet = createStyleSheet('Sidebar', theme => ({
+const styleSheet = createStyleSheet('Sidebar', (theme) => ({
   container: {
     flex: 1,
     display: 'flex',
-    maxHeight: 'calc(100vh - 64px)'
+    maxHeight: 'calc(100vh - 64px)',
+  },
+  title: {
+    marginBottom: theme.spacing.unit * 2,
   },
   sidebar: {
     flexGrow: 1,
@@ -49,13 +48,14 @@ const styleSheet = createStyleSheet('Sidebar', theme => ({
   }),
   head: theme.mixins.gutters({
 
-  })
-}));
+  }),
+}))
 
 class Sidebar extends Component {
 
   onSaveMarker = (event) => {
     const { firebase } = this.props
+
     event.preventDefault()
 
     const marker = {
@@ -65,28 +65,29 @@ class Sidebar extends Component {
     }
 
     firebase.push('/markers', marker)
-
   }
 
   render() {
     const {
       markers,
-      firebase,
-      auth,
       account,
       currentMarkerPostiion,
       isCreating,
       toggleCreationModeAction,
       selectedMarkerAction,
     } = this.props
-    const classes = this.props.classes;
+    const classes = this.props.classes
 
     return (
       <div className={classes.container}>
         <Paper className={classes.sidebar} elevation={4}>
           <div className={classes.sidebarWidget}>
-            <Typography type="headline" component="h3">
+            <Typography type="headline" component="h3" className={classes.title}>
               React Mapbox
+            </Typography>
+            <Typography type="body1">
+              This is a sample react application using Redux,
+              Mapbox and Firebase to handle markers in Realtime
             </Typography>
           </div>
           <div className={classes.sidebarWidget} style={{ paddingLeft: 0, paddingRight: 0 }}>
@@ -94,12 +95,21 @@ class Sidebar extends Component {
               Last five insertions
             </Typography>
             <List dense>
-            { markers && isLoaded(markers) && Object.keys(markers).map((key, i) => (markers[key].user) && (i < 5) ? (
-              <ListItem button key={key} onClick={(event) => selectedMarkerAction(markers[key])}>
-                <Avatar alt={markers[key].user.displayName} src={markers[key].user.avatarUrl} />
-                <ListItemText primary={markers[key].user.displayName} secondary={markers[key].user.email} />
-              </ListItem>
-            ) : null ) }
+              { markers
+                && isLoaded(markers)
+                && Object.keys(markers).map((key, i) => (markers[key].user) && (i < 5) ? ( // eslint-disable-line
+                  <ListItem
+                    button
+                    key={key}
+                    onClick={() => selectedMarkerAction(markers[key])}
+                  >
+                    <Avatar alt={markers[key].user.displayName} src={markers[key].user.avatarUrl} />
+                    <ListItemText
+                      primary={markers[key].user.displayName}
+                      secondary={moment(markers[key].createdAt).fromNow()}
+                    />
+                  </ListItem>
+                ) : null)}
             </List>
           </div>
 
@@ -121,7 +131,13 @@ class Sidebar extends Component {
                 Save my marker!
               </Button>
             ) : (
-              <Button disabled={!isLoaded(account)} onClick={(event) => toggleCreationModeAction(true)} raised className={classes.button} color="accent">
+              <Button
+                disabled={isEmpty(account)}
+                onClick={() => toggleCreationModeAction(true)}
+                raised
+                className={classes.button}
+                color="accent"
+              >
                 Create my location
               </Button>
             ) }
@@ -135,29 +151,43 @@ class Sidebar extends Component {
 }
 
 Sidebar.propTypes = {
+  isCreating: PropTypes.bool,
+  toggleCreationModeAction: PropTypes.func,
+  selectedMarkerAction: PropTypes.func,
+  markers: PropTypes.object,
   classes: PropTypes.object.isRequired,
+  account: PropTypes.object,
+  currentMarkerPostiion: PropTypes.object,
   firebase: PropTypes.shape({
-    push: PropTypes.func.isRequired
-  })
-};
+    push: PropTypes.func.isRequired,
+  }),
+}
 
-const styledSidebar = withStyles(styleSheet)(Sidebar);
+const styledSidebar = withStyles(styleSheet)(Sidebar)
 
 const fbWrappedComponent = firebaseConnect([
-  { path: 'markers', queryParams: ['orderByKey', 'limitToLast=100'] } // 10 most recent
+  { path: 'markers', queryParams: ['orderByChild=createdAt', 'limitToLast=100'] }, // 10 most recent
   // { type: 'once', path: '/markers' } // for loading once instead of binding
-  // '/markers#populate=owner:displayNames' // for populating owner parameter from id into string loaded from /displayNames root
-  // '/markers#populate=collaborators:users' // for populating owner parameter from id to user object loaded from /users root
-  // { path: 'markers', populates: [{ child: 'collaborators', root: 'users' }] } // object notation of population
-  // '/markers#populate=owner:users:displayName' // for populating owner parameter from id within to displayName string from user object within users root
+  // '/markers#populate=owner:displayNames'
+  // for populating owner parameter from id into string loaded from /displayNames root
+  // '/markers#populate=collaborators:users'
+  // for populating owner parameter from id to user object loaded from /users root
+  // { path: 'markers', populates: [{ child: 'collaborators', root: 'users' }] }
+  // object notation of population
+  // '/markers#populate=owner:users:displayName'
+  // for populating owner parameter from id within
+  // to displayName string from user object within users root
 ])(styledSidebar)
 
 const mapStateToProps = ({ firebase, map }) => ({
-    auth: pathToJS(firebase, 'auth'),
-    account: pathToJS(firebase, 'profile'),
-    markers: dataToJS(firebase, 'markers'),
-    currentMarkerPostiion: map.currentMarkerPostiion,
-    isCreating: map.isCreating,
+  auth: pathToJS(firebase, 'auth'),
+  account: pathToJS(firebase, 'profile'),
+  markers: dataToJS(firebase, 'markers'),
+  currentMarkerPostiion: map.currentMarkerPostiion,
+  isCreating: map.isCreating,
 })
 
-export default connect(mapStateToProps, { toggleCreationModeAction, selectedMarkerAction })(fbWrappedComponent)
+export default connect(
+  mapStateToProps,
+  { toggleCreationModeAction, selectedMarkerAction },
+)(fbWrappedComponent)

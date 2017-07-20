@@ -3,7 +3,7 @@ import { firebaseStateReducer as firebase } from 'react-redux-firebase'
 import MapReducer from './MapReducer'
 
 const rootReducer = combineReducers({
-  firebase,
+  firebase: firebase,
   map: MapReducer,
 })
 
