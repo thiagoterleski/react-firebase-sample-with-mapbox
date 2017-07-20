@@ -1,5 +1,6 @@
-![](screenshot.png)
 # React sample application using Firebase with Mapbox
+
+![](screenshot.png)
 
 This project was made with purpose to serve as a pratical example using firebase, redux and mapbox to handle markers on a map. You can put a marker on map using your google account, for any other user running this app will be updated with your marker. This is also a study case for lib `react-redux-firebase` that make firebase very easy to use for simple realtime applications.
 
