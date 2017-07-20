@@ -1,12 +1,40 @@
-# React sample with new material-ui framework
+# React sample application using Firebase with Mapbox
 
-O propóstio deste projeto é servir como exemplo de implementação utilizando a excelente lib `react-redux-firebase` com o mapBox.
-Além disso, estou usando a nova versão (em alpha) do material-ui para testar e poder contribuir com o projeto usando em aplicações práticas.
+This project was made with purpose to serve as a pratical example using firebase, redux and mapbox to handle markers on a map. You can put a marker on map using your google account, for any other user running this app will be updated with your marker. This is also a study case for lib `react-redux-firebase` that make firebase very easy to use for simple realtime applications.
 
-# What it does?
-Esta aplicação de exemplo permite as seguintes funcionalidades:
- - Autenticar uma conta do google
- - Visualizar marcações em tempo real de outras pessoas
- - Criar uma marcação no mapa
- - Editar uma marcação (alterar a foto)
- - Remover uma marcação
+## Libs
+ - [ReactMapboxGl](https://github.com/alex3165/react-mapbox-gl)
+ - [React Redux Firebase](http://react-redux-firebase.com/)
+ - [Redux](http://redux.js.org/)
+ - [Moment](https://momentjs.com/)
+ - [Material UI](https://material-ui-1dab0.firebaseapp.com)
+> I think this UI framework is fantastic and decided use the alpha version to test, some features like CSSJS are amazing.
+
+## What it does?
+This sample must provide the follow functionalities:
+ - Google auth login
+ - See reltime markers on the map
+ - Create yout own marker with your google avatar
+
+## Possible implementations
+ - Facebook login
+ - User profile edit
+ - Edit markers
+ - Delete a marker
+ - Any ideas?
+
+ ---
+
+
+ # Get started
+
+ ```
+ $ git clone https://github.com/thiagoterleski/react-firebase-sample-with-mapbox
+ $ cd react-firebase-sample-with-mapbox
+ $ yarn install
+ ```
+
+ This sample was made with *Create React App* [(more information)](https://github.com/facebookincubator/create-react-app/issues/new) see the doc for requirements.
+
+## Run
+`yarn start`

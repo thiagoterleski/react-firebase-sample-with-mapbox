@@ -12,11 +12,13 @@ import { AppBar as UIAppBar } from 'material-ui'
 import Toolbar from 'material-ui/Toolbar'
 import Grid from 'material-ui/Grid'
 import Avatar from 'material-ui/Avatar'
+import IconButton from 'material-ui/IconButton'
 import { CircularProgress } from 'material-ui/Progress'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
 import AccountCircle from 'material-ui-icons/AccountCircle'
 import IMGFirebase from '../../../assets/images/google-firebase.png'
+import IMGGit from '../../../assets/images/github-logo.svg'
 
 const styleSheet = createStyleSheet('AppBar', (theme) => ({
   button: {
